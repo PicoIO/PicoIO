@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Pico I/O - Configuration</title>
+        <link rel="icon" type="image/png" href="http://picoio.org/wp-content/uploads/2025/02/default-monochrome-white.png">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+            body{
+                background-color: #fdb83e;
+            }
+            h1{
+                text-align: center;
+                font-size: 4vw;
+            }
+            h2{
+                text-align: left;
+                font-size: 3vw;
+                align-self: start;
+            }
+            h3{
+                font-size: 2vw;
+                text-align: left;
+            }
+            div{
+                border: 3px solid black;
+                width: -webkit-fill-available;
+                padding: 2vw;
+                margin: 5vw;
+            }
+            table{
+                padding: 1vw;
+                font-size: 2vw;
+                width: -webkit-fill-available;
+                border-collapse: collapse;
+                text-align: left;
+            }
+            tr{
+                border-bottom: 1pt solid black;
+                height: 3vw;
+            }
+            select{
+                font-size: 2vw;
+            }
+            form{
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            button{
+                margin-top: 3vw;
+                font-size: 2vw;
+            }
+            input{
+                font-size: 2vw;
+            }
+            input[type="checkbox"] {
+                width: 2vw;
+                height: 2vw;
+            }
+            .stat{
+                border: none;
+                padding: 0;
+                margin: 0;
+            }
+            .red_dot{
+                height: 2vw;
+                width: 2vw;
+                background-color: red;
+                border-radius: 2vw;
+                display: inline-block;
+            }
+            .green_dot{
+                height: 2vw;
+                width: 2vw;
+                background-color: green;
+                border-radius: 2vw;
+                display: inline-block;
+            }
+            .grey_dot{
+                height: 2vw;
+                width: 2vw;
+                background-color: gray;
+                border-radius: 2vw;
+                display: inline-block;
+            }
+            #gpio_aux{
+                margin-top: 3vw;
+            }
+
+            .switch {
+                position: relative;
+                display: inline-block;
+                width: 4vw;
+                height: 2vw;
+            }
+            .switch input { 
+                opacity: 0;
+                width: 0;
+                height: 0;
+            }
+            .slider {
+                position: absolute;
+                cursor: pointer;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: red;
+                -webkit-transition: .4s;
+                transition: .4s;
+            }
+            .slider:before {
+                position: absolute;
+                content: "";
+                height: 1vw;
+                width: 1vw;
+                left: 0.5vw;
+                bottom: 0.5vw;
+                background-color: white;
+                -webkit-transition: .4s;
+                transition: .4s;
+            }
+            input:checked + .slider {
+                background-color: green;
+            }
+            input:checked + .slider:before {
+                -webkit-transform: translateX(2vw);
+                -ms-transform: translateX(2vw);
+                transform: translateX(2vw);
+            }
+            .slider {
+                border-radius: 1vw;
+            }
+            .slider:before {
+                border-radius: 1vw;
+            }
+            #for_1wire{
+                text-align: center;
+            }
+            .delete{
+                margin: 0;
+            }
+            #div_udp{
+                margin: 0;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Pico I/O</h1>
+        <div>
+            <form id="gpio_config" action="gpio_config">
+                <h2>GPIO Config:</h2>
+                <table id="gpio"></table>
+                <table id="gpio_aux" style="display: none;"></table>
+            </form>
+        </div>
+        <div>
+            <form id="network_config" action="network_config">
+                <h2>Network Config</h2>
+                <table id="net_config">
+                    <tr>
+                        <td>
+                            <label>Method</label>
+                        </td>
+                        <td>
+                            <select id="net_method" name="net_method">
+                                <option value="0">DHCP</option>
+                                <option value="1">Static</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label>IP Address</label>
+                        </td>
+                        <td>
+                            <input type="text" class="net_ip" id="ipaddress" name="ipaddress" onchange="ValidateIPaddressOnChange(this)"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label>Netmask</label>
+                        </td>
+                        <td>
+                            <input type="text" class="net_ip" id="netmask" name="netmask" onchange="ValidateIPaddressOnChange(this)"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label>Gateway</label>
+                        </td>
+                        <td>
+                            <input type="text" class="net_ip" id="gateway" name="gateway" onchange="ValidateIPaddressOnChange(this)"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label>DNS</label>
+                        </td>
+                        <td>
+                            <input type="text" class="net_ip" id="dns" name="dns" onchange="ValidateIPaddressOnChange(this)"/>
+                        </td>
+                    </tr>
+                </table>
+                <button>Save</button>
+            </form>
+        </div>
+        <div>
+            <form id="communication" action="communication">
+                <h2>Communication</h2>
+                <div id="div_udp">
+                    <h3>UDP</h3>
+                    <table id="tb_udp">
+                        <tr>
+                            <td>
+                                <input type="checkbox" id="udp" name="udp">
+                            </td>
+                            <td>
+                                <label>IP: </label>
+                                <input type="text" class="net_ip" id="udp_ip" name="udp_ip" onchange="ValidateIPaddressOnChange(this)">
+                            </td>
+                            <td>
+                                <label>Port: </label>
+                                <input type="number" id="udp_port" name="udp_port">
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <button>Save</button>
+            </form>
+        </div>
+        <div>
+            <form id="system" action="system">
+                <h2>System</h2>
+                <table id="tb_system">
+                    <tr>
+                        <td>
+                            <label>Host</label>
+                        </td>
+                        <td>
+                            <input type="text" id="host" name="host"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label>User</label>
+                        </td>
+                        <td>
+                            <input type="text" id="sys_user" name="sys_user"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label>Password</label>
+                        </td>
+                        <td>
+                            <input type="password" id="sys_pass" name="sys_pass"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label>Board</label>
+                        </td>
+                        <td>
+                            <label id="board"></label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label>MicroPython Version</label>
+                        </td>
+                        <td>
+                            <label id="micropython"></label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label>Software Version</label>
+                        </td>
+                        <td>
+                            <label id="software_v"></label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label>Software Chanel</label>
+                        </td>
+                        <td>
+                            <select name="sw_ch" id="sw_ch">
+                                <option value="0">Production</option>
+                                <option value="1">Testing</option>
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+                <button>Save</button>
+            </form>
+        </div>
+    </body>
+</html>
+
+<script  src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.0/jquery.min.js"></script>
