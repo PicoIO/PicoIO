@@ -53,13 +53,6 @@ async def main():
 
     while True:
         gc.collect()
-        mem = 0
-        if gc.mem_free() < 100000:
-            mem = mem + 1
-        else:
-            mem = 0
-        if mem > 1:
-            machine.reset()
 
         if global_var.config_load:
             conf = startup.config_load()
@@ -105,8 +98,6 @@ async def main():
             time_temp = 0
         else:
             time_temp = time_temp + 1
-
-        free_mem.free_mem()
         
         await asyncio.sleep(time_sleep)
     

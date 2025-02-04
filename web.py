@@ -1,4 +1,4 @@
-import ubinascii
+#import ubinascii
 import hashlib
 import binascii
 
@@ -12,6 +12,15 @@ from time import sleep
 import global_var
 
 import free_mem
+
+import urequests
+from os import listdir
+from os import remove
+from os import mkdir
+from machine import reset
+#import json
+
+import gc
 
 async def serve_client(reader, writer):
     url = url_encode()
@@ -49,6 +58,8 @@ async def serve_client(reader, writer):
     request = str(request_line)
 
     if auth == 1:
+
+        script_gpio = request.find('/script_gpio')
 
         gp_stat = request.find('/gp_stat')
         gp_act = request.find('/gp_act?')
@@ -373,56 +384,124 @@ async def serve_client(reader, writer):
         elif update == 6:
             version = url.decode(request).replace("b'GET /update?", '').replace(" HTTP/1.1\\r\\n'", '').split('=')[1]
 
-            import os
-            import machine
-            
-            listdir = os.listdir()
+            hw_conf = '{"board": "' + conf['hw']['board'] + '", "release": "' + conf['hw']['release'] + '", "sw": "'
+            hw_conf += version + '", "sw_ch": "' + conf['hw']['sw_ch'] + '", "sysname": "' + conf['hw']['sysname'] + '"}'
 
-            for items in listdir:
-                if items.find('.') < 0:
-                    for item in os.listdir(items):
-                        os.remove(items + '/' + item)
-                    os.remove(items)
-                else:
+            gpio_conf = str(conf['gpio']).replace("'", '"')
+            debounce_conf = str(conf['debounce']).replace("'", '"')
+            wire_conf = str(conf['1wire']).replace("'", '"')
+            network_conf = str(conf['network']).replace("'", '"')
+            communication_conf = str(conf['communication']).replace("'", '"')
+            security_conf = str(conf['security']).replace("'", '"')
+
+            config_str = '{\n  "hw":\n  ' + hw_conf + ',\n  "gpio":\n' + gpio_conf + '\n,\n  "debounce":\n  '
+            config_str += debounce_conf + ',\n  "1wire":\n  ' + wire_conf + ',\n  "network":\n  '
+            config_str += network_conf + ',\n  "communication":\n  ' + communication_conf + ',\n  "security":\n  '
+            config_str += security_conf + ',\n}'
+
+            print (config_str)
+
+            config = open("config.conf", "w")
+            config.write(config_str)
+            config.close()
+
+            del hw_conf, gpio_conf, debounce_conf, wire_conf, network_conf, communication_conf, security_conf, config_str, config
+            gc.collect()
+            
+            for items in listdir():
+                try:
+                    for item in listdir(items):
+                        print ('remove: ' + items + '/' + item)
+                        remove(items + '/' + item)
+                    print ('remove: ' + items)
+                    remove(items)
+                except:
                     if not items.endswith('.conf'):
-                        os.remove(items)
+                        print ('remove: ' + items)
+                        remove(items)
 
-            import requests
-            url = "https://api.github.com/repos/picoio/picoio/contents/?ref=refs/tags/" + version
-            sw = requests.get(url)
+            del items
+            del item
+            gc.collect()
 
-            print (sw)
-            
-            #with open("PicoIO-" + version.replace('v','') + ".zip", 'wb') as fd:
-            #    fd.write(sw.content)
+            sw = get_files('', version)
 
-            #fd.close()
+            for items in sw:
+                gc.collect()
+                if items['type'] == 'dir':
+                    print ("create directory: " + items['path'])
+                    mkdir(items['path'])
+                    sw1 = get_files(items['path'], version)
+                    for item in sw1:
+                        if item['type'] == 'file':
+                            url = item['download_url']
+                            fl = urequests.get(url)
+                            print ('download file: ' + item['path'])
+                            with open(item['path'], 'wb') as fd:
+                                fd.write(fl.content)
+                            fd.close()
+                elif items['type'] == 'file':
+                    url = items['download_url']
+                    fl = urequests.get(url)
+                    print ('download file: ' + items['name'])
+                    with open(items['name'], 'wb') as fd:
+                        fd.write(fl.content)
+                    fd.close()
 
-            #machine.reset()
+            response = "<script>window.location.href = window.location.protocol + '//' + window.location.host;</script>"
+            writer.write(response)
+
+            reset()
+
+
+        elif script_gpio == 6:
+            with open("script_gpio.js", "r") as file:
+                html = file.read()
+            response = html % conf
+
+            writer.write(response)
+
 
         else:
             response = html
+            del html
+            gc.collect()
             writer.write(response)
-
-            with open("script_gpio.html", "r") as file:
-                html = file.read()
-            response = html % conf
-            writer.write(response)
+            del response          
+            gc.collect()  
 
             with open("script_network.html", "r") as file:
                 html = file.read()
+            del file
+            gc.collect()
             response = html
+            del html
+            gc.collect()
             writer.write(response)
+            del response
+            gc.collect()
 
             with open("script_communication.html", "r") as file:
                 html = file.read()
+            del file
+            gc.collect()
             response = html
+            del html
+            gc.collect
             writer.write(response)
+            del response
+            gc.collect()
 
             with open("script_system.html", "r") as file:
                 html = file.read()
+            del file
+            gc.collect()
             response = html
+            del html
+            gc.collect()
             writer.write(response)
+            del response
+            gc.collect()
 
     else:
         with open("unauthorized.html", "r") as file:
@@ -455,3 +534,9 @@ async def serve_client(reader, writer):
     reader = None
 
     pass
+
+def get_files(path, version):
+    url = "https://api.github.com/repos/picoio/picoio/contents/" + path + "?ref=refs/tags/" + version
+    sw = urequests.get(url, headers = {'User-Agent': 'Mozilla/5.0'}).json()
+    
+    return sw

@@ -1,4 +1,4 @@
-<script>
+
     conf = %s;
     gp = [];
     input = 0;
@@ -420,5 +420,3 @@
             document.getElementById('for_1wire').appendChild(new_button2);
         }
     }
-
-</script> 
