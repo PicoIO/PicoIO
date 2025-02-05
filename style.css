@@ -1,0 +1,164 @@
+body{
+    background-color: #fdb83e;
+}
+
+h1{
+    text-align: center;
+    font-size: 4vw;
+}
+
+h2{
+    text-align: left;
+    font-size: 3vw;
+    align-self: start;
+}
+
+h3{
+    font-size: 2vw;
+    text-align: left;
+}
+
+div{
+    border: 3px solid black;
+    width: -webkit-fill-available;
+    padding: 2vw;
+    margin: 5vw;
+}
+
+table{
+    padding: 1vw;
+    font-size: 2vw;
+    width: -webkit-fill-available;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+tr{
+    border-bottom: 1pt solid black;
+    height: 3vw;
+}
+
+select{
+    font-size: 2vw;
+}
+
+form{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+button{
+    margin-top: 3vw;
+    font-size: 2vw;
+}
+
+input{
+    font-size: 2vw;
+}
+
+input[type="checkbox"] {
+    width: 2vw;
+    height: 2vw;
+}
+
+.stat{
+    border: none;
+    padding: 0;
+    margin: 0;
+}
+
+.red_dot{
+    height: 2vw;
+    width: 2vw;
+    background-color: red;
+    border-radius: 2vw;
+    display: inline-block;
+}
+
+.green_dot{
+    height: 2vw;
+    width: 2vw;
+    background-color: green;
+    border-radius: 2vw;
+    display: inline-block;
+}
+
+.grey_dot{
+    height: 2vw;
+    width: 2vw;
+    background-color: gray;
+    border-radius: 2vw;
+    display: inline-block;
+}
+
+#gpio_aux{
+    margin-top: 3vw;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 4vw;
+    height: 2vw;
+}
+
+.switch input { 
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: red;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 1vw;
+    width: 1vw;
+    left: 0.5vw;
+    bottom: 0.5vw;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+input:checked + .slider {
+    background-color: green;
+}
+
+input:checked + .slider:before {
+    -webkit-transform: translateX(2vw);
+    -ms-transform: translateX(2vw);
+    transform: translateX(2vw);
+}
+
+.slider {
+    border-radius: 1vw;
+}
+
+.slider:before {
+    border-radius: 1vw;
+}
+
+#for_1wire{
+    text-align: center;
+}
+
+.delete{
+    margin: 0;
+}
+
+#div_udp{
+    margin: 0;
+}

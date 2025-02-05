@@ -41,10 +41,9 @@ async def serve_client(reader, writer):
             hash_object.update(barrier.encode())
             hash_barrier = binascii.hexlify(hash_object.digest())
             if hash_barrier.decode("utf8") == conf['security']['barrier']:
-                writer.write('HTTP/1.0 200 OK\r\nContent-type: text/html\r\n\r\n')
+                
                 auth = 1
-                with open("index.html", "r") as file:
-                    html = file.read()
+                
                 pass
             elif header == b'\r\n':
                 if auth == 0:
@@ -59,8 +58,13 @@ async def serve_client(reader, writer):
 
     if auth == 1:
 
-        script_gpio = request.find('/script_gpio')
+        style = request.find('/style.css')
+        script_gpio = request.find('/script_gpio.js')
+        script_network = request.find('/script_network.js')
+        script_communication = request.find('/script_communication.js')
+        script_system = request.find('/script_system.js')
 
+        root = request.find('/ ')
         gp_stat = request.find('/gp_stat')
         gp_act = request.find('/gp_act?')
         gp_save = request.find('/gpio_config?')
@@ -70,7 +74,20 @@ async def serve_client(reader, writer):
         update = request.find('/update?')
         sys_config = request.find('/system?')
 
-        if gp_stat == 6:
+        if root == 6:
+            writer.write('HTTP/1.0 200 OK\r\nContent-type: text/html\r\n\r\n')
+            with open("index.html", "r") as file:
+                html = file.read()
+            response = html
+            writer.write(response)
+
+            await writer.drain()
+            await writer.wait_closed()
+            print("Client disconnected")
+            pass
+
+        elif gp_stat == 6:
+            writer.write('HTTP/1.0 200 OK\r\nContent-type: text/html\r\n\r\n')
             input = []
             output = []
             onewire = []
@@ -150,12 +167,19 @@ async def serve_client(reader, writer):
             response = js
             writer.write(response)
 
+            await writer.drain()
+            await writer.wait_closed()
+            print("Client disconnected")
+            pass
+
         elif gp_act == 6:
+            writer.write('HTTP/1.0 200 OK\r\nContent-type: text/html\r\n\r\n')
             gp = url.decode(request).replace("b'GET /gp_act?", "").split("=")[0]
             stat = url.decode(request).replace("b'GET /gp_act?", "").split("=")[1].replace(" HTTP/1.1\\r\\n'", "")
             Pin(int(gp)).value(int(stat))
 
         elif gp_save == 6:
+            writer.write('HTTP/1.0 200 OK\r\nContent-type: text/html\r\n\r\n')
             gp_conf = url.decode(request).replace("b'GET /gpio_config?", "").replace(" HTTP/1.1\\r\\n'", "").split('&')
 
             gpio_conf = ""
@@ -240,6 +264,7 @@ async def serve_client(reader, writer):
             writer.write(response)
     
         elif wifi_scan == 6:
+            writer.write('HTTP/1.0 200 OK\r\nContent-type: text/html\r\n\r\n')
             from wifi import connect_wifi
             wifis = connect_wifi.station.wlan.scan()
             wifi_list = []
@@ -267,7 +292,13 @@ async def serve_client(reader, writer):
             wifi_scaned = None
             wifi_list = None
 
+            await writer.drain()
+            await writer.wait_closed()
+            print("Client disconnected")
+            pass
+
         elif net_config == 6:
+            writer.write('HTTP/1.0 200 OK\r\nContent-type: text/html\r\n\r\n')
             net_conf = url.decode(request).replace("b'GET /network_config?", "").replace(" HTTP/1.1\\r\\n'", "").split("&")
 
             network_conf = ''
@@ -331,10 +362,16 @@ async def serve_client(reader, writer):
             response = "<script>window.location.href = window.location.protocol + '//' + window.location.host;</script>"
             writer.write(response)
 
+            await writer.drain()
+            await writer.wait_closed()
+            print("Client disconnected")
+            pass
+
             import machine
             machine.reset()
 
         elif comm_config == 6:
+            writer.write('HTTP/1.0 200 OK\r\nContent-type: text/html\r\n\r\n')
             comm_conf = url.decode(request).replace("b'GET /communication?", '').replace(" HTTP/1.1\\r\\n'", '').split('&')
 
             communication_conf = '{"UDP": {'
@@ -379,10 +416,16 @@ async def serve_client(reader, writer):
             response = "<script>window.location.href = window.location.protocol + '//' + window.location.host;</script>"
             writer.write(response)
 
+            await writer.drain()
+            await writer.wait_closed()
+            print("Client disconnected")
+            pass
+
             import machine
             machine.reset()
 
         elif update == 6:
+            writer.write('HTTP/1.0 200 OK\r\nContent-type: text/html\r\n\r\n')
             version = url.decode(request).replace("b'GET /update?", '').replace(" HTTP/1.1\\r\\n'", '').split('=')[1]
 
             hw_conf = '{"board": "' + conf['hw']['board'] + '", "release": "' + conf['hw']['release'] + '", "sw": "'
@@ -450,9 +493,15 @@ async def serve_client(reader, writer):
             response = "<script>window.location.href = window.location.protocol + '//' + window.location.host;</script>"
             writer.write(response)
 
+            await writer.drain()
+            await writer.wait_closed()
+            print("Client disconnected")
+            pass
+
             reset()
 
-        elif sys_config ==6:
+        elif sys_config == 6:
+            writer.write('HTTP/1.0 200 OK\r\nContent-type: text/html\r\n\r\n')
             sys_conf = url.decode(request).replace("b'GET /system?", '').replace(" HTTP/1.1\\r\\n'", '').split('&')
 
             host = ''
@@ -502,56 +551,82 @@ async def serve_client(reader, writer):
             response = "<script>window.location.href = window.location.protocol + '//' + window.location.host;</script>"
             writer.write(response)
 
+            await writer.drain()
+            await writer.wait_closed()
+            print("Client disconnected")
+            pass
+
             reset()
 
+
+        elif style == 6:
+            writer.write('HTTP/1.0 200 OK\r\nContent-type: text/css\r\n\r\n')
+            with open("style.css", "r") as file:
+                html = file.read()
+            response = html
+
+            writer.write(response)
+
+            await writer.drain()
+            await writer.wait_closed()
+            print("Client disconnected")
+            pass
+
         elif script_gpio == 6:
+            writer.write('HTTP/1.0 200 OK\r\nContent-type: text/js\r\n\r\n')
             with open("script_gpio.js", "r") as file:
                 html = file.read()
             response = html % conf
 
             writer.write(response)
 
+            await writer.drain()
+            await writer.wait_closed()
+            print("Client disconnected")
+            pass
 
-        else:
-            response = html
-            del html
-            gc.collect()
-            writer.write(response)
-            del response          
-            gc.collect()  
-
-            with open("script_network.html", "r") as file:
+        elif script_network == 6:
+            writer.write('HTTP/1.0 200 OK\r\nContent-type: text/js\r\n\r\n')
+            with open("script_network.js", "r") as file:
                 html = file.read()
-            del file
-            gc.collect()
             response = html
-            del html
-            gc.collect()
-            writer.write(response)
-            del response
-            gc.collect()
 
-            with open("script_communication.html", "r") as file:
-                html = file.read()
-            del file
-            gc.collect()
-            response = html
-            del html
-            gc.collect
             writer.write(response)
-            del response
-            gc.collect()
 
-            with open("script_system.html", "r") as file:
+            await writer.drain()
+            await writer.wait_closed()
+            print("Client disconnected")
+            pass
+
+        elif script_communication == 6:
+            writer.write('HTTP/1.0 200 OK\r\nContent-type: text/js\r\n\r\n')
+            with open("script_communication.js", "r") as file:
                 html = file.read()
-            del file
-            gc.collect()
             response = html
-            del html
-            gc.collect()
+
             writer.write(response)
-            del response
-            gc.collect()
+
+            await writer.drain()
+            await writer.wait_closed()
+            print("Client disconnected")
+            pass
+
+        elif script_system == 6:
+            writer.write('HTTP/1.0 200 OK\r\nContent-type: text/js\r\n\r\n')
+            with open("script_system.js", "r") as file:
+                html = file.read()
+            response = html
+
+            writer.write(response)
+
+            await writer.drain()
+            await writer.wait_closed()
+            print("Client disconnected")
+            pass
+
+
+        #else:
+            
 
     else:
         with open("unauthorized.html", "r") as file:
@@ -561,10 +636,6 @@ async def serve_client(reader, writer):
 
     free_mem.free_mem()
     #writer.write(response)
-
-    await writer.drain()
-    await writer.wait_closed()
-    print("Client disconnected")
 
     request_line = None
     auth = None
@@ -583,8 +654,6 @@ async def serve_client(reader, writer):
 
     writer = None
     reader = None
-
-    pass
 
 def get_files(path, version):
     url = "https://api.github.com/repos/picoio/picoio/contents/" + path + "?ref=refs/tags/" + version
