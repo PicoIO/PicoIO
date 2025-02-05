@@ -467,9 +467,9 @@ async def serve_client(reader, writer):
                 if items.split('=')[0] == 'sys_pass':
                     sys_pass = items.split('=')[1]
                 if items.split('=')[0] == 'sw_ch':
-                    if items.split('=')[1] == 1:
+                    if items.split('=')[1] == '1':
                         sw_ch = 'test'
-                    elif items.split('=')[1] == 0:
+                    elif items.split('=')[1] == '0':
                         sw_ch = 'production'
                 
             hw_conf = '{"board": "' + conf['hw']['board'] + '", "release": "' + conf['hw']['release'] + '", "sw": "'
@@ -486,7 +486,7 @@ async def serve_client(reader, writer):
             hash_object.update(barrier.encode())
             hash_barrier = binascii.hexlify(hash_object.digest())
             
-            security_conf = '{"user": "' + conf['security']['user'] + '", "barrier": "' + hash_barrier + '"}'
+            security_conf = '{"user": "' + conf['security']['user'] + '", "barrier": "' + str(hash_barrier).replace("b'",'').replace("'",'') + '"}'
 
             config_str = '{\n  "hw":\n  ' + hw_conf + ',\n  "gpio":\n' + gpio_conf + '\n,\n  "debounce":\n  '
             config_str += debounce_conf + ',\n  "1wire":\n  ' + wire_conf + ',\n  "network":\n  '
