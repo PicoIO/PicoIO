@@ -1,4 +1,4 @@
-#import ubinascii
+import ubinascii
 import hashlib
 import binascii
 
@@ -481,9 +481,11 @@ async def serve_client(reader, writer):
             network_conf = str(conf['network']).replace("'", '"')
             communication_conf = str(conf['communication']).replace("'", '"')
 
-            import security
-
-            hash_barrier = str(security.auth_barrier(sys_pass))
+            barrier = str(ubinascii.b2a_base64('admin:%s' % (sys_pass)).strip()).replace("b'", "").replace("'", "")
+            hash_object = hashlib.sha256()
+            hash_object.update(barrier.encode())
+            hash_barrier = binascii.hexlify(hash_object.digest())
+            
             security_conf = '{"user": "' + conf['security']['user'] + '", "barrier": "' + hash_barrier + '"}'
 
             config_str = '{\n  "hw":\n  ' + hw_conf + ',\n  "gpio":\n' + gpio_conf + '\n,\n  "debounce":\n  '
