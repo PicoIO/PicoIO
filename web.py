@@ -68,6 +68,7 @@ async def serve_client(reader, writer):
         net_config = request.find('/network_config?')
         comm_config = request.find('/communication?')
         update = request.find('/update?')
+        sys_config = request.find('/system?')
 
         if gp_stat == 6:
             input = []
@@ -399,8 +400,6 @@ async def serve_client(reader, writer):
             config_str += network_conf + ',\n  "communication":\n  ' + communication_conf + ',\n  "security":\n  '
             config_str += security_conf + ',\n}'
 
-            print (config_str)
-
             config = open("config.conf", "w")
             config.write(config_str)
             config.close()
@@ -453,6 +452,50 @@ async def serve_client(reader, writer):
 
             reset()
 
+        elif sys_config ==6:
+            sys_conf = url.decode(request).replace("b'GET /system?", '').replace(" HTTP/1.1\\r\\n'", '').split('&')
+
+            host = ''
+            sys_user = ''
+            sys_pass = ''
+            sw_ch = ''
+            for items in sys_conf:
+                if items.split('=')[0] == 'host':
+                    host = items.split('=')[1]
+                if items.split('=')[0] == 'sys_user':
+                    sys_user = items.split('=')[1]
+                if items.split('=')[0] == 'sys_pass':
+                    sys_pass = items.split('=')[1]
+                if items.split('=')[0] == 'sw_ch':
+                    if items.split('=')[1] == 1:
+                        sw_ch = 'test'
+                    elif items.split('=')[1] == 0:
+                        sw_ch = 'production'
+                
+            hw_conf = '{"board": "' + conf['hw']['board'] + '", "release": "' + conf['hw']['release'] + '", "sw": "'
+            hw_conf += conf['hw']['sw'] + '", "sw_ch": "' + sw_ch + '", "sysname": "' + host + '"}'
+
+            gpio_conf = str(conf['gpio']).replace("'", '"')
+            debounce_conf = str(conf['debounce']).replace("'", '"')
+            wire_conf = str(conf['1wire']).replace("'", '"')
+            network_conf = str(conf['network']).replace("'", '"')
+            communication_conf = str(conf['communication']).replace("'", '"')
+
+            import security
+
+            hash_barrier = str(security.auth_barrier(sys_user, sys_pass))
+            security_conf = '{"user": "' + sys_user + '", "barrier": "' + hash_barrier + '"}'
+
+            config_str = '{\n  "hw":\n  ' + hw_conf + ',\n  "gpio":\n' + gpio_conf + '\n,\n  "debounce":\n  '
+            config_str += debounce_conf + ',\n  "1wire":\n  ' + wire_conf + ',\n  "network":\n  '
+            config_str += network_conf + ',\n  "communication":\n  ' + communication_conf + ',\n  "security":\n  '
+            config_str += security_conf + ',\n}'
+
+            print (config_str)
+
+            config = open("config.conf", "w")
+            config.write(config_str)
+            config.close()
 
         elif script_gpio == 6:
             with open("script_gpio.js", "r") as file:

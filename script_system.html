@@ -65,8 +65,10 @@
                     }
                 }
                 else{
-                    if (loc_non_prod.split('.')[0] == 'alpha' || loc_non_prod.split('.')[0] == 'beta'){
-                        update_test += 1;
+                    if (loc_non_prod){
+                        if (loc_non_prod.split('.')[0] == 'alpha' || loc_non_prod.split('.')[0] == 'beta'){
+                            update_test += 1;
+                        }
                     }
                 }
 

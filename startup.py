@@ -55,13 +55,19 @@ def config_load():
         config.write('\n  "communication":\n  {\n    "UDP":\n    {\n      "enabled": "0",\n      ')
         config.write('"ip": "",\n      "port": "50000"\n    }\n  },')
         #security
-        import ubinascii
-        import hashlib
-        import binascii
-        barrier = str(ubinascii.b2a_base64('admin:%s' % ('password')).strip()).replace("b'", "").replace("'", "")
-        hash_object = hashlib.sha256()
-        hash_object.update(barrier.encode())
-        hash_barrier = binascii.hexlify(hash_object.digest())
+        
+        #import ubinascii
+        #import hashlib
+        #import binascii
+        #barrier = str(ubinascii.b2a_base64('admin:%s' % ('password')).strip()).replace("b'", "").replace("'", "")
+        #hash_object = hashlib.sha256()
+        #hash_object.update(barrier.encode())
+        #hash_barrier = binascii.hexlify(hash_object.digest())
+
+        import security
+
+        hash_barrier = str(security.auth_barrier('admin','password'))
+
         config.write('\n  "security":\n  {\n    "user": "admin",\n    "barrier": "')
         config.write(hash_barrier)
         config.write('"\n  }')
