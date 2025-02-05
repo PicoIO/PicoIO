@@ -4,6 +4,7 @@
     document.getElementById("board").innerText = conf['hw']['board'];
     document.getElementById("micropython").innerText = conf['hw']['release'];
     document.getElementById("software_v").innerText = conf['hw']['sw'];
+    document.getElementById('sys_save').disabled = true;
 
     if (conf['hw']['sw_ch'] == 'production'){
         document.getElementById("sw_ch").selectedIndex = 0;
@@ -15,6 +16,15 @@
     fetch('https://api.github.com/repos/picoio/picoio/releases')
         .then(response => response.json())
         .then(response => new_soft(response));
+
+    document.getElementById('sys_pass').addEventListener("change", () => {
+        if (length(document.getElementById('sys_pass').value) > 8){
+            document.getElementById('sys_save').disabled = false;
+        }
+        else{
+            document.getElementById('sys_save').disabled = true;
+        }
+    })
 
     function new_soft(response){
         last_version = ''
@@ -39,7 +49,7 @@
                 loc_non_prod = conf['hw']['sw'].replace('v', '').split('-')[1];
 
                 update_test = 0;
-                if (git_non_prod){
+                if (git_non_prod && loc_non_prod){
                     if (git_non_prod.split('.')[0] == 'beta' && loc_non_prod.split('.')[0] == 'alpha'){
                         update_test += 1;
                     }
