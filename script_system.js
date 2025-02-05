@@ -4,6 +4,7 @@ document.getElementById("board").innerText = conf['hw']['board'];
 document.getElementById("micropython").innerText = conf['hw']['release'];
 document.getElementById("software_v").innerText = conf['hw']['sw'];
 document.getElementById('sys_save').disabled = true;
+document.getElementById("up_conf").disabled = true;
 
 if (conf['hw']['sw_ch'] == 'production'){
     document.getElementById("sw_ch").selectedIndex = 0;
@@ -23,6 +24,25 @@ document.getElementById('sys_pass').addEventListener("change", () => {
     else{
         document.getElementById('sys_save').disabled = true;
     }
+})
+
+document.getElementById("conf_file").addEventListener("change", () => {
+    if (document.getElementById("conf_file").files.length > 0){
+        document.getElementById("up_conf").disabled = false;
+    }
+    else{
+        document.getElementById("up_conf").disabled = true;
+    }
+})
+
+document.getElementById("up_conf").addEventListener("click", async() => {
+    reader = new FileReader();
+    reader.addEventListener("load", () => {
+        file_read = reader['result'];
+        body_send = file_read + '\r\nEOF\r\n';
+        fetch('\\up_conf', {body: body_send, method: "POST"})
+    })
+    reader.readAsText(document.getElementById("conf_file").files[0])
 })
 
 function new_soft(response){
