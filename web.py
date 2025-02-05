@@ -497,6 +497,11 @@ async def serve_client(reader, writer):
             config.write(config_str)
             config.close()
 
+            response = "<script>window.location.href = window.location.protocol + '//' + window.location.host;</script>"
+            writer.write(response)
+
+            reset()
+
         elif script_gpio == 6:
             with open("script_gpio.js", "r") as file:
                 html = file.read()
