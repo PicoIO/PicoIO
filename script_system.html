@@ -18,7 +18,7 @@
         .then(response => new_soft(response));
 
     document.getElementById('sys_pass').addEventListener("change", () => {
-        if (length(document.getElementById('sys_pass').value) > 8){
+        if (document.getElementById('sys_pass').value.length >= 8){
             document.getElementById('sys_save').disabled = false;
         }
         else{
