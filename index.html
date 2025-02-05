@@ -4,7 +4,7 @@
         <title>Pico I/O - Configuration</title>
         <link rel="icon" type="image/png" href="http://picoio.org/wp-content/uploads/2025/02/default-monochrome-white.png">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" type="text/css" href="http://192.168.1.200/style.css">
+        <link rel="stylesheet" type="text/css" href="/style.css">
     </head>
     <body>
         <h1>Pico I/O</h1>
@@ -151,6 +151,35 @@
                                 <option value="0">Production</option>
                                 <option value="1">Testing</option>
                             </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label>Download config file</label>
+                        </td>
+                        <td>
+                            <button type="button" class="delete" onclick="window.open('/config.conf')">Download</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td rowspan="2">
+                            <label>Upload config file</label>
+                        </td>
+                        <td>
+                            <input type="file" id="conf_file">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <input type="button" value="Upload" id="up_conf">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label>Reset factory default</label>
+                        </td>
+                        <td>
+                            <button type="button" class="delete" onclick="window.location='/factory_reset'">Reset</button>
                         </td>
                     </tr>
                 </table>
