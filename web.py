@@ -456,14 +456,14 @@ async def serve_client(reader, writer):
             sys_conf = url.decode(request).replace("b'GET /system?", '').replace(" HTTP/1.1\\r\\n'", '').split('&')
 
             host = ''
-            sys_user = ''
+            #sys_user = ''
             sys_pass = ''
             sw_ch = ''
             for items in sys_conf:
                 if items.split('=')[0] == 'host':
                     host = items.split('=')[1]
-                if items.split('=')[0] == 'sys_user':
-                    sys_user = items.split('=')[1]
+                #if items.split('=')[0] == 'sys_user':
+                #    sys_user = items.split('=')[1]
                 if items.split('=')[0] == 'sys_pass':
                     sys_pass = items.split('=')[1]
                 if items.split('=')[0] == 'sw_ch':
@@ -483,8 +483,8 @@ async def serve_client(reader, writer):
 
             import security
 
-            hash_barrier = str(security.auth_barrier(sys_user, sys_pass))
-            security_conf = '{"user": "' + sys_user + '", "barrier": "' + hash_barrier + '"}'
+            hash_barrier = str(security.auth_barrier(sys_pass))
+            security_conf = '{"user": "' + conf['security']['user'] + '", "barrier": "' + hash_barrier + '"}'
 
             config_str = '{\n  "hw":\n  ' + hw_conf + ',\n  "gpio":\n' + gpio_conf + '\n,\n  "debounce":\n  '
             config_str += debounce_conf + ',\n  "1wire":\n  ' + wire_conf + ',\n  "network":\n  '
@@ -555,6 +555,7 @@ async def serve_client(reader, writer):
         with open("unauthorized.html", "r") as file:
                 html = file.read()
         response = html
+        writer.write(response)
 
     free_mem.free_mem()
     #writer.write(response)
