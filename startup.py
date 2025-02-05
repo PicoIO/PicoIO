@@ -21,7 +21,7 @@ def config_load():
         config.write(uname[1])
         config.write('",\n    "release": "')
         config.write(uname[2])
-        config.write('",\n    "sw": "v0.0.1-alpha",\n    "sw_ch": "production"\n  },')
+        config.write('",\n    "sw": "v0.0.0",\n    "sw_ch": "production"\n  },')
         #gpio
         config.write('\n  "gpio":\n  {')
         for i in range(29):
@@ -56,17 +56,13 @@ def config_load():
         config.write('"ip": "",\n      "port": "50000"\n    }\n  },')
         #security
         
-        #import ubinascii
-        #import hashlib
-        #import binascii
-        #barrier = str(ubinascii.b2a_base64('admin:%s' % ('password')).strip()).replace("b'", "").replace("'", "")
-        #hash_object = hashlib.sha256()
-        #hash_object.update(barrier.encode())
-        #hash_barrier = binascii.hexlify(hash_object.digest())
-
-        import security
-
-        hash_barrier = str(security.auth_barrier('admin','password'))
+        import ubinascii
+        import hashlib
+        import binascii
+        barrier = str(ubinascii.b2a_base64('admin:%s' % ('password')).strip()).replace("b'", "").replace("'", "")
+        hash_object = hashlib.sha256()
+        hash_object.update(barrier.encode())
+        hash_barrier = binascii.hexlify(hash_object.digest())
 
         config.write('\n  "security":\n  {\n    "user": "admin",\n    "barrier": "')
         config.write(hash_barrier)
