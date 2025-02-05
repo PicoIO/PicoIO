@@ -73,6 +73,9 @@ async def serve_client(reader, writer):
         comm_config = request.find('/communication?')
         update = request.find('/update?')
         sys_config = request.find('/system?')
+        save_conf = request.find('/config.conf')
+        up_conf = request.find('/up_conf')
+        factory_reset = request.find('/factory_reset')
 
         if root == 6:
             writer.write('HTTP/1.0 200 OK\r\nContent-type: text/html\r\n\r\n')
@@ -542,8 +545,6 @@ async def serve_client(reader, writer):
             config_str += network_conf + ',\n  "communication":\n  ' + communication_conf + ',\n  "security":\n  '
             config_str += security_conf + ',\n}'
 
-            print (config_str)
-
             config = open("config.conf", "w")
             config.write(config_str)
             config.close()
@@ -555,6 +556,52 @@ async def serve_client(reader, writer):
             await writer.wait_closed()
             print("Client disconnected")
             pass
+
+            reset()
+
+        elif save_conf == 6:
+            writer.write('HTTP/1.0 200 OK\r\nContent-type: application/octet-stream .conf\r\n\r\n')
+            with open("config.conf", "r") as file:
+                html = file.read()
+            response = html
+
+            writer.write(response)
+
+            await writer.drain()
+            await writer.wait_closed()
+            print("Client disconnected")
+            pass
+
+        elif up_conf == 7:
+            line = []
+            while True:
+                l = await reader.readline()
+                l = l.decode("utf8")
+                if l.find('EOF') < 0:
+                    line.append(l)
+                else:
+                    break
+
+            config_str = ''
+            for item in line:
+                config_str += item
+
+            config = open("config.conf", "w")
+            config.write(config_str)
+            config.close()
+
+            writer.write('HTTP/1.0 200 OK\r\nContent-type: text/html\r\n\r\n')
+
+            await writer.drain()
+            await writer.wait_closed()
+            print("Client disconnected")
+            pass
+
+            reset()
+
+        elif factory_reset == 6:
+            import os
+            os.remove('config.conf')
 
             reset()
 
@@ -625,8 +672,12 @@ async def serve_client(reader, writer):
             pass
 
 
-        #else:
-            
+        else:
+            writer.write('HTTP/1.0 404 Not Found\r\n\r\n')          
+            await writer.drain()
+            await writer.wait_closed()
+            print("Client disconnected")
+            pass  
 
     else:
         with open("unauthorized.html", "r") as file:
