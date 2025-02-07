@@ -14,6 +14,9 @@ import network
 
 import gc
 
+import web
+import communication
+
 async def main():
     
     global_var.init()
@@ -25,9 +28,7 @@ async def main():
 
     if conf['hw']['board'] == 'Raspberry Pi Pico W with RP2040':
         from wifi import connect_wifi
-        import web
-        import communication
-
+        
         if conf['network']['wifi']['ssid'] == '':
             connect_wifi.ap.connect()
         elif conf['network']['wifi']['password'] == '':
@@ -36,16 +37,29 @@ async def main():
             connect_wifi.station.connect(conf['network']['wifi']['ssid'],conf['network']['wifi']['password'])
             if conf['network']['type'] == 'static':                
                 connect_wifi.station.wlan.ifconfig((conf['network']['ip'], conf['network']['netmask'], conf['network']['gateway'] , conf['network']['dns']))
+            await asyncio.sleep(1)
+            try:
+                update = open('update.conf', 'r')
+                version = update.read()
+                from web_fn import upadte_fn
+                upadte_fn(conf, version)
+            except:
+                print ('no update')
 
         asyncio.create_task(asyncio.start_server(web.serve_client, "0.0.0.0", 80))
     elif conf['hw']['board'] == 'W5500-EVB-Pico with RP2040':
         import net
-        import web
-        import communication
 
         net.w5x00_init()
         if conf['network']['type'] == 'static':
             net.nic.ifconfig((conf['network']['ip'], conf['network']['netmask'], conf['network']['gateway'] , conf['network']['dns']))
+        try:
+            update = open('update.conf', 'r')
+            version = update.read()
+            from web_fn import upadte_fn
+            upadte_fn(conf, version)
+        except:
+            print ('no update')
         asyncio.create_task(asyncio.start_server(web.serve_client, "0.0.0.0", 80))
         
     time_sleep = 0.1

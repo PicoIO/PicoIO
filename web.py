@@ -22,6 +22,8 @@ from machine import reset
 
 import gc
 
+import asyncio
+
 async def serve_client(reader, writer):
     url = url_encode()
     
@@ -428,70 +430,8 @@ async def serve_client(reader, writer):
             machine.reset()
 
         elif update == 6:
-            writer.write('HTTP/1.0 200 OK\r\nContent-type: text/html\r\n\r\n')
             version = url.decode(request).replace("b'GET /update?", '').replace(" HTTP/1.1\\r\\n'", '').split('=')[1]
-
-            hw_conf = '{"board": "' + conf['hw']['board'] + '", "release": "' + conf['hw']['release'] + '", "sw": "'
-            hw_conf += version + '", "sw_ch": "' + conf['hw']['sw_ch'] + '", "sysname": "' + conf['hw']['sysname'] + '"}'
-
-            gpio_conf = str(conf['gpio']).replace("'", '"')
-            debounce_conf = str(conf['debounce']).replace("'", '"')
-            wire_conf = str(conf['1wire']).replace("'", '"')
-            network_conf = str(conf['network']).replace("'", '"')
-            communication_conf = str(conf['communication']).replace("'", '"')
-            security_conf = str(conf['security']).replace("'", '"')
-
-            config_str = '{\n  "hw":\n  ' + hw_conf + ',\n  "gpio":\n' + gpio_conf + '\n,\n  "debounce":\n  '
-            config_str += debounce_conf + ',\n  "1wire":\n  ' + wire_conf + ',\n  "network":\n  '
-            config_str += network_conf + ',\n  "communication":\n  ' + communication_conf + ',\n  "security":\n  '
-            config_str += security_conf + ',\n}'
-
-            config = open("config.conf", "w")
-            config.write(config_str)
-            config.close()
-
-            del hw_conf, gpio_conf, debounce_conf, wire_conf, network_conf, communication_conf, security_conf, config_str, config
-            gc.collect()
-            
-            for items in listdir():
-                try:
-                    for item in listdir(items):
-                        print ('remove: ' + items + '/' + item)
-                        remove(items + '/' + item)
-                    print ('remove: ' + items)
-                    remove(items)
-                except:
-                    if not items.endswith('.conf'):
-                        print ('remove: ' + items)
-                        remove(items)
-
-            del items
-            del item
-            gc.collect()
-
-            sw = get_files('', version)
-
-            for items in sw:
-                gc.collect()
-                if items['type'] == 'dir':
-                    print ("create directory: " + items['path'])
-                    mkdir(items['path'])
-                    sw1 = get_files(items['path'], version)
-                    for item in sw1:
-                        if item['type'] == 'file':
-                            url = item['download_url']
-                            fl = urequests.get(url)
-                            print ('download file: ' + item['path'])
-                            with open(item['path'], 'wb') as fd:
-                                fd.write(fl.content)
-                            fd.close()
-                elif items['type'] == 'file':
-                    url = items['download_url']
-                    fl = urequests.get(url)
-                    print ('download file: ' + items['name'])
-                    with open(items['name'], 'wb') as fd:
-                        fd.write(fl.content)
-                    fd.close()
+            writer.write('HTTP/1.0 200 OK\r\nContent-type: text/html\r\n\r\n')
 
             response = "<script>window.location.href = window.location.protocol + '//' + window.location.host;</script>"
             writer.write(response)
@@ -499,7 +439,12 @@ async def serve_client(reader, writer):
             await writer.drain()
             await writer.wait_closed()
             print("Client disconnected")
-            pass
+            
+            update = open('update.conf', 'w')
+            update.write(version)
+            update.close()
+
+            await asyncio.sleep(10)
 
             reset()
 
@@ -705,9 +650,3 @@ async def serve_client(reader, writer):
 
     writer = None
     reader = None
-
-def get_files(path, version):
-    url = "https://api.github.com/repos/picoio/picoio/contents/" + path + "?ref=refs/tags/" + version
-    sw = urequests.get(url, headers = {'User-Agent': 'Mozilla/5.0'}).json()
-    
-    return sw
