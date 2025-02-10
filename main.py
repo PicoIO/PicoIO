@@ -47,6 +47,10 @@ async def main():
                 print ('no update')
 
         asyncio.create_task(asyncio.start_server(web.serve_client, "0.0.0.0", 80))
+        
+        server = communication.UDPServer()
+        await server.serve(communication.recive_msg)
+
     elif conf['hw']['board'] == 'W5500-EVB-Pico with RP2040':
         import net
 
@@ -61,6 +65,9 @@ async def main():
         except:
             print ('no update')
         asyncio.create_task(asyncio.start_server(web.serve_client, "0.0.0.0", 80))
+        
+        server = communication.UDPServer()
+        await server.serve(communication.recive_msg)
         
     time_sleep = 0.1
     time_temp = int(conf['1wire']['s_time'])*(1/time_sleep)
@@ -77,26 +84,7 @@ async def main():
         elif conf['hw']['board'] == 'W5500-EVB-Pico with RP2040':
             net.w5x00_reconect()
 
-        UDP_EN = conf['communication']['UDP']['enabled']
-        UDP_IP = conf['communication']['UDP']['ip']
-        UDP_PORT = int(conf['communication']['UDP']['port'])
 
-        if UDP_EN == '1':
-            sock = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
-            sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-            sock.bind( (UDP_IP, UDP_PORT) )
-            sock.settimeout(1)
-            try:
-                data, addr = sock.recvfrom(1024)
-                data_pin = int(data.decode("utf8").rstrip().replace("pin: ", "").split(" set:")[0])
-                data_state = int(data.decode("utf8").rstrip().split(" set:")[1])
-                if str(Pin(data_pin)).find('OUT') > 0:
-                    Pin(data_pin).value(data_state)
-                    MESSAGE = 'pin: ' + str(data_pin) + ' state: ' + str(Pin(data_pin).value())
-                    communication.send_msg(MESSAGE)
-            except:
-                sock.close()
-            sock.close()
         #await startup.one_wire(global_var.OneWire, global_var.OneWireSensors)
         #print('temp')
         is_1wire = startup.is_one_wire(conf) 
