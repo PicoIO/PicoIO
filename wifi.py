@@ -44,8 +44,8 @@ class connect_wifi:
         def connect():
             connect_wifi.ap.wlan.active(True)
         def disconnect():
-            connect_wifi.ap.wlan.disconnect()
             connect_wifi.ap.wlan.active(False)
+
     def connection(conf):
         while not connect_wifi.station.wlan.isconnected():
             conn = connect_wifi.reconnection(conf)
@@ -69,7 +69,6 @@ class connect_wifi:
             for i in range(len(wifi_ap)):
                 if wifi_ap[i][0].decode("utf-8") == conf['network']['wifi']['ssid']:
                     connect_wifi.ap.disconnect()
-                    
                     connect_wifi.station.connect(conf['network']['wifi']['ssid'],conf['network']['wifi']['password'])
                     rt += 1
         return rt

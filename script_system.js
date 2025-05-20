@@ -13,7 +13,9 @@ if (conf['hw']['sw_ch'] == 'test'){
     document.getElementById("sw_ch").selectedIndex = 1;
 }
 
-fetch('https://api.github.com/repos/picoio/picoio/releases')
+fetch('https://api.github.com/repos/picoio/picoio/releases', {
+  headers: {Authorization: 'Bearer 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'}
+})
     .then(response => response.json())
     .then(response => new_soft(response));
 
